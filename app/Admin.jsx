@@ -14,6 +14,7 @@ import {
   TextInput,
   useColorScheme,
   Switch,
+  Button,
 } from "react-native";
 import { useState, useContext } from "react";
 import { Link } from "expo-router";
@@ -25,40 +26,54 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStyles } from "@/hooks/useThemeStyles";
 import { useUser } from "../context/UserContext";
 import { useRouter } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useEvent } from "../context/EventsContext";
 
-export default function SignUp() {
+const Admin = () => {
+  const { user, SignUpLoading, SignUp, SignUpError } = useUser();
+
   const {
-    user,
-    SignUpLoading,
-    firstName,
-    LastName,
-    matricNumber,
-    email,
-    password,
-    dispatch,
-    SignUp,
-    SignUpError,
+    event_name,
+    description,
+    location,
+    start_date,
+    end_date,
     handelChange,
-  } = useUser();
+    createEvent,
+    isLoading,
+  } = useEvent();
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    handelChange("start_date", selectedDate);
+    console.log(start_date);
+
+    setShow(false);
+    setStartDate(currentDate);
+  };
+
+  const setEndDateFunc = (event, setSelectedEndDate) => {
+    const EndDate = setSelectedEndDate;
+    handelChange("end_date", setSelectedEndDate);
+    console.log(end_date);
+
+    setShow(false);
+    setEndDate(EndDate);
+  };
 
   const { border, text, background } = useThemeStyles();
-
-  // route User
-  const router = useRouter();
-  user && router.replace("/QrScanScreen");
-
   return (
     <ThemedView style={{ height: "100%" }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          enabled={true}
-          //   behavior={Platform.OS === "ios" ? "padding" : "height"}
-          // style={{ flex: 1, width: "100%" }}
-        >
+        <KeyboardAvoidingView enabled={true}>
           <View style={styles.container}>
-            <ThemedText type="title">Sign Up</ThemedText>
+            <ThemedText type="title">Create Event</ThemedText>
             <View style={{ marginTop: 30 }}>
-              <ThemedText type="label">First Name</ThemedText>
+              <ThemedText type="label">Event Name</ThemedText>
               <View>
                 <TextInput
                   style={[
@@ -70,19 +85,13 @@ export default function SignUp() {
                     },
                   ]}
                   placeholderTextColor={"gray"}
-                  placeholder="John"
+                  placeholder="CSC404"
                   color={text}
-                  onChangeText={(text) => handelChange("firstName", text)}
+                  onChangeText={(text) => handelChange("event_name", text)}
                   //onChangeText={handlePasswordChange}
                 />
-                <Ionicons
-                  style={{ position: "absolute", right: 35, top: "30%" }}
-                  name="mail-outline"
-                  size={20}
-                  color="gray"
-                />
               </View>
-              <ThemedText type="label">LastName</ThemedText>
+              <ThemedText type="label">Description</ThemedText>
               <View>
                 <TextInput
                   style={[
@@ -94,19 +103,13 @@ export default function SignUp() {
                     },
                   ]}
                   placeholderTextColor={"gray"}
-                  placeholder="Doe"
+                  placeholder="Data structures and algorithms "
                   color={text}
-                  onChangeText={(text) => handelChange("lastName", text)}
+                  onChangeText={(text) => handelChange("description", text)}
                   //onChangeText={handlePasswordChange}
                 />
-                <Ionicons
-                  style={{ position: "absolute", right: 35, top: "30%" }}
-                  name="mail-outline"
-                  size={20}
-                  color="gray"
-                />
               </View>
-              <ThemedText type="label">Email</ThemedText>
+              <ThemedText type="label">Location</ThemedText>
               <View>
                 <TextInput
                   style={[
@@ -118,70 +121,42 @@ export default function SignUp() {
                     },
                   ]}
                   placeholderTextColor={"gray"}
-                  placeholder="john@example.com"
-                  color={text}
-                  value={email}
-                  onChangeText={(text) => handelChange("email", text)}
-                  //onChangeText={handlePasswordChange}
-                />
-                <Ionicons
-                  style={{ position: "absolute", right: 35, top: "30%" }}
-                  name="mail-outline"
-                  size={20}
-                  color="gray"
-                />
-              </View>
-              {/* Matric number */}
-              <ThemedText type="label">Matriculation Number</ThemedText>
-              <View>
-                <TextInput
-                  style={[
-                    styles.textInput,
-                    {
-                      backgroundColor: "transparent",
-                      borderColor: border,
-                      borderWidth: 1,
-                    },
-                  ]}
-                  placeholderTextColor={"gray"}
-                  placeholder="0123456789"
-                  onChangeText={(text) => handelChange("matricNumber", text)}
+                  placeholder="NAS1"
+                  onChangeText={(text) => handelChange("location", text)}
                   //onChangeText={handlePasswordChange}
                   color={text}
                   // secureTextEntry={viewPassword}
                 />
               </View>
-              {/* Department */}
-              <ThemedText type="label">Password</ThemedText>
-              <View>
-                <TextInput
-                  style={[
-                    styles.textInput,
-                    {
-                      backgroundColor: "transparent",
-                      borderColor: border,
-                      borderWidth: 1,
-                    },
-                  ]}
-                  placeholderTextColor={"gray"}
-                  placeholder="***********"
-                  value={password}
-                  onChangeText={(text) => handelChange("password", text)}
-                  //onChangeText={handlePasswordChange}
-                  color={text}
-                  // secureTextEntry={viewPassword}
+              <ThemedText type="label">Date and Tine</ThemedText>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  // alignItems: "center",
+                  marginTop: 10,
+                  marginLeft: -10,
+                }}
+              >
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={startDate}
+                  mode={"datetime"}
+                  is24Hour={true}
+                  onChange={onChange}
                 />
-                <MaterialCommunityIcons
-                  // onPress={() => ViewInputPassword()}
-                  name="eye-off-outline"
-                  size={20}
-                  color="gray"
-                  style={{ position: "absolute", right: 35, top: "30%" }}
+                <ThemedText style={{ paddingLeft: 10, paddingTop: 10 }}>
+                  {" "}
+                  End Date{" "}
+                </ThemedText>
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={endDate}
+                  mode={"datetime"}
+                  is24Hour={true}
+                  onChange={setEndDateFunc}
                 />
               </View>
-              {/* password */}
-              {/* password entry green */}
-              {/* Policy */}
               <View style={styles.policy}>
                 {SignUpError ? (
                   <ThemedText
@@ -219,46 +194,23 @@ export default function SignUp() {
         {/* <Link replace href="/HomeScreen" asChild> */}
         <TouchableOpacity
           style={[styles.LoginButton, { backgroundColor: border }]}
-          onPress={SignUp}
+          onPress={createEvent}
         >
-          {SignUpLoading ? (
+          {isLoading ? (
             <ActivityIndicator size="small" color="black" />
           ) : (
             <ThemedText style={{ color: background }} type="button">
-              Sign Up
+              Create Event
             </ThemedText>
           )}
         </TouchableOpacity>
         {/* </Link> */}
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 10,
-          }}
-        >
-          <Link href="\" asChild>
-            <TouchableOpacity>
-              <ThemedText style={{ color: text }} type="tiny">
-                Have an account?{" "}
-                <ThemedText
-                  style={{
-                    color: text,
-                    textDecorationLine: "underline",
-                  }}
-                  type="tiny"
-                >
-                  Login
-                </ThemedText>
-              </ThemedText>
-            </TouchableOpacity>
-          </Link>
-        </View>
       </View>
     </ThemedView>
   );
-}
+};
+
+export default Admin;
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,

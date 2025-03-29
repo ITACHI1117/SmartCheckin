@@ -32,7 +32,7 @@ const CountDownTimer = ({ start, end }) => {
         const minutes = Math.floor((diff / 1000 / 60) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
 
-        setTimeLeft(`Time Left: ${hours}:${minutes}`);
+        setTimeLeft(`Time Left: ${hours}:${minutes}:${seconds}`);
         // console.log(`${hours} : ${minutes}: ${seconds}s remaining`);
       }
 

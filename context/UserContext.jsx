@@ -117,7 +117,6 @@ function UserProvider({ children }) {
       const data = snapshot.val();
       dispatch({ type: "LOGIN_SUCCESS", payload: data });
     });
-    return userInfo;
   }
 
   function SignUp() {

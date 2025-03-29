@@ -27,6 +27,7 @@ export default function RootLayout() {
               name="EventLists"
               options={{ headerShown: false, presentation: "modal" }}
             />
+            <Stack.Screen name="Admin" options={{ headerShown: false }} />
           </Stack>
         </ThemeProvider>
       </EventProvider>

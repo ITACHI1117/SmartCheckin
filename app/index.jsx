@@ -24,6 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStyles } from "@/hooks/useThemeStyles";
 import { useUser } from "../context/UserContext";
 import { useRouter } from "expo-router";
+import { Picker } from "@react-native-picker/picker";
 
 export default function Index() {
   const {
@@ -35,12 +36,24 @@ export default function Index() {
     Login,
     handelChange,
   } = useUser();
+  const [selectedUser, setSelectedUser] = useState("Student");
+  const [redirectScreen, setRedirectScreen] = useState("");
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   const { border, text, background } = useThemeStyles();
 
+  // route user to main page
   const router = useRouter();
+  function handelLogin() {
+    if (selectedUser == "Student") {
+      Login();
+      setRedirectScreen("/QrScanScreen");
+    } else {
+      router.navigate("/Admin");
+    }
+  }
 
-  user && router.replace("/QrScanScreen");
+  user && router.replace(redirectScreen);
 
   return (
     <ThemedView style={{ height: "100%" }}>
@@ -106,6 +119,41 @@ export default function Index() {
                   style={{ position: "absolute", right: 35, top: "30%" }}
                 />
               </View>
+              <View>
+                <TouchableOpacity
+                  style={[
+                    styles.textInput,
+                    {
+                      backgroundColor: "transparent",
+                      borderColor: border,
+                      borderWidth: 1,
+                    },
+                  ]}
+                  onPress={() => setPickerVisible(true)}
+                >
+                  <ThemedText>Select position</ThemedText>
+                </TouchableOpacity>
+                {pickerVisible && (
+                  <Picker
+                    selectedValue={selectedUser}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setSelectedUser(itemValue)
+                    }
+                    style={{ marginLeft: -15 }}
+                  >
+                    <Picker.Item label="Student" value="Student" />
+                    <Picker.Item label="Staff" value="Staff" />
+                  </Picker>
+                )}
+
+                {/* <MaterialCommunityIcons
+                  // onPress={() => ViewInputPassword()}
+                  name="eye-off-outline"
+                  size={20}
+                  color="gray"
+                  style={{ position: "absolute", right: 35, top: "30%" }}
+                /> */}
+              </View>
               {/* password entry green */}
               {/* Policy */}
               <View style={styles.policy}>
@@ -142,7 +190,7 @@ export default function Index() {
         {/* <Link replace href="/HomeScreen" asChild> */}
         <TouchableOpacity
           style={[styles.LoginButton, { backgroundColor: border }]}
-          onPress={Login}
+          onPress={handelLogin}
         >
           {LoginLoading ? (
             <ActivityIndicator size="small" color="black" />
@@ -161,7 +209,7 @@ export default function Index() {
             marginTop: 10,
           }}
         >
-          <Link href="/QrScanScreen" asChild>
+          <Link href="/SignUp" asChild>
             <TouchableOpacity>
               <ThemedText style={{ color: text }} type="tiny">
                 Don't have an account?{" "}

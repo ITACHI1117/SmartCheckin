@@ -1,8 +1,9 @@
 import { isLoading } from "expo-font";
 import { createContext, useContext, useReducer } from "react";
 import { database } from "../firebaseConfig";
-import { ref, set, update } from "firebase/database";
+import { ref, set, update, push } from "firebase/database";
 import { onValue } from "firebase/database";
+import { ObjectSchema } from "firebase/vertexai";
 
 const EventContext = createContext();
 
@@ -10,6 +11,16 @@ const initialState = {
   selectedEvent: null,
   isLoading: false,
   error: false,
+
+  // create Events State
+  event_name: "",
+  description: "",
+  location: "",
+  start_date: "",
+  end_date: "",
+
+  // all events from db
+  allEvents: null,
 };
 
 function reducer(state, action) {
@@ -31,6 +42,29 @@ function reducer(state, action) {
         isLoading: false,
         error: action.payload,
       };
+    case "SET_CREATED_EVENT":
+      return {
+        ...state,
+        [action.payload.field]: action.payload.value,
+      };
+    case "SET_CREATING_EVENT":
+      return {
+        ...state,
+        isLoading: true,
+        error: action.payload,
+      };
+    case "SET_CREATED_SAVED":
+      return {
+        ...state,
+        isLoading: false,
+        error: action.payload,
+      };
+    case "GET_ALL_EVENTS":
+      return {
+        ...state,
+        isLoading: false,
+        allEvents: action.payload,
+      };
     default: {
       throw new Error("Invalid action type");
     }
@@ -38,10 +72,20 @@ function reducer(state, action) {
 }
 
 function EventProvider({ children }) {
-  const [{ selectedEvent, isLoading, error }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const [
+    {
+      selectedEvent,
+      event_name,
+      description,
+      location,
+      start_date,
+      end_date,
+      isLoading,
+      allEvents,
+      error,
+    },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
   // functions
   function markAttendance(event, user) {
@@ -54,6 +98,7 @@ function EventProvider({ children }) {
       checkin_time: Date.now(),
     });
   }
+
   function handleSelectedEvent(event, user) {
     console.log(event);
     console.log(user);
@@ -62,9 +107,63 @@ function EventProvider({ children }) {
     // dispatch({ type: "SET_SELECTED_EVENT", payload: [event, user] });
   }
 
+  // Create Events
+  function handelChange(field, value) {
+    dispatch({ type: "SET_CREATED_EVENT", payload: { field, value } });
+  }
+  //  Create Event and save to database
+  function createEvent() {
+    const ISO_String_Start_Date = new Date(start_date).toISOString();
+    const ISO_String_End_Date = new Date(end_date).toISOString();
+
+    console.log("Start Date: ", ISO_String_Start_Date);
+    console.log("END Date: ", ISO_String_End_Date);
+
+    dispatch({ type: "SET_CREATING_EVENT", payload: null });
+    push(ref(database, `Events/`), {
+      event_name: event_name,
+      description: description,
+      start_time: ISO_String_Start_Date,
+      end_time: ISO_String_End_Date,
+      location: [6.5244, 3.1926642868809285],
+    });
+    dispatch({ type: "SET_CREATED_SAVED", payload: null });
+  }
+
+  // Get All Events
+  function getAllEvents() {
+    const userRef = ref(database, `Events/`);
+    onValue(userRef, (snapshot) => {
+      const data = snapshot.val();
+      if (userRef) {
+        const allEventsArray = Object.entries(data).map(([id, event]) => ({
+          id, // Firebase key
+          ...event,
+        }));
+        dispatch({ type: "GET_ALL_EVENTS", payload: allEventsArray });
+      }
+    });
+    // console.log(allEvents);
+  }
+
   return (
     <EventContext.Provider
-      value={{ selectedEvent, isLoading, error, dispatch, handleSelectedEvent }}
+      value={{
+        selectedEvent,
+        isLoading,
+        error,
+        event_name,
+        description,
+        location,
+        start_date,
+        end_date,
+        allEvents,
+        dispatch,
+        handleSelectedEvent,
+        handelChange,
+        createEvent,
+        getAllEvents,
+      }}
     >
       {children}
     </EventContext.Provider>

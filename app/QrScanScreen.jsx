@@ -15,24 +15,23 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useUser } from "../context/UserContext";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useEvent } from "../context/EventsContext";
 
 export default function QrScanScreen() {
   const { user, dispatch } = useUser();
+  const { getAllEvents, allEvents } = useEvent();
   const [facing, setFacing] = useState("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [scanedData, setScannedData] = useState(null);
 
   const router = useRouter();
-
-  console.log(user);
-
   const { border, text } = useThemeStyles();
 
+  // Check Camera Permission
   if (!permission) {
     // Camera permissions are still loading.
     return <View />;
   }
-
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
@@ -46,21 +45,19 @@ export default function QrScanScreen() {
   }
 
   permission.granted && Camera;
+
+  // Set Camera Facing (Front Camera or BAck)
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   }
 
+  //  Handel the Qr Scanned
   const handleScannedData = async (data) => {
-    // console.log(data.data);
-
-    const res = await fetch(data.data);
-    const eventData = await res.json();
-    router.navigate(`/EventLists?events=${data.data}`);
-    // router.setParams({events: scanedData})
-
-    // fetch(`${scanedData}`).then((res) => console.log(res));
+    await getAllEvents();
+    allEvents && router.navigate(`/EventLists`);
   };
 
+  // Handel Log out
   const handleLogOut = () => {
     dispatch({ type: "LOGOUT", payload: null });
     router.replace("./");

@@ -16,34 +16,22 @@ import { useUser } from "../context/UserContext";
 import CountDownTimer from "../components/CountDownTimer";
 import * as Location from "expo-location";
 import getDistance from "../utils/calculateDistance";
+import { convertDate } from "../utils/convertDate";
 
 const EventLists = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const { events } = useLocalSearchParams();
+  // const { allEvents } = useLocalSearchParams();
   const [eventsData, setEventsData] = useState([]);
 
   const { border, text } = useThemeStyles();
 
   const { user } = useUser();
+  const { allEvents } = useEvent();
   const { handleSelectedEvent } = useEvent();
 
-  //   date, description event, start-end, ends in
-
-  useEffect(() => {
-    async function getEvents() {
-      const res = await fetch(events);
-      const data = await res.json();
-      setEventsData(data);
-    }
-    getEvents();
-  }, [events]);
-
-  const convertDate = (date) => {
-    const newDate = new Date(date);
-    return newDate.toLocaleTimeString();
-  };
-
+  console.log(allEvents);
+  // Get user Location
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -58,22 +46,35 @@ const EventLists = () => {
     })();
   }, []);
 
+  // Handel Event Time, Location and Selected Event
   const handleLocation = (event) => {
-    const homeLat = 6.5244; // Replace with your house latitude
-    const homeLon = 3.1926642868809285;
+    const startTime = new Date(event.start_time);
+    const endTime = new Date(event.end_time);
+    const now = new Date();
+    // Check event Time
+    if (now >= endTime) {
+      alert("Event has ended");
+    } else if (now < startTime) {
+      alert("Event has not started");
+    } else {
+      const homeLat = 6.5244; // Latitude
+      const homeLon = 3.1926642868809285; //Longitude
 
-    if (location) {
-      const distance = getDistance(
-        location.latitude,
-        location.longitude,
-        homeLat,
-        homeLon
-      );
-      if (distance > 400) {
-        alert("You are too far from the allowed area!");
-      } else {
-        handleSelectedEvent(event, user);
-        console.log("You are within radius");
+      // Check and confirm user location
+      if (location) {
+        const distance = getDistance(
+          location.latitude,
+          location.longitude,
+          homeLat,
+          homeLon
+        );
+        if (distance > 400) {
+          alert("You are too far from the allowed area!");
+        } else {
+          // Mark the student Attendance to the selected Event
+          handleSelectedEvent(event, user);
+          alert("You have been added to the Attendance List ✅");
+        }
       }
     }
   };
@@ -101,46 +102,57 @@ const EventLists = () => {
       ) : (
         <ThemedView style={{ width: "100%", height: "100%" }}>
           <ScrollView style={{ height: "100%" }}>
-            {eventsData.map((event) => {
-              return (
-                <TouchableOpacity
-                  key={event.event_id}
-                  onPress={() => handleLocation(event)}
-                >
-                  <ThemedView
-                    key={event.event_id}
-                    style={[
-                      styles.eventContainer,
-                      { borderColor: border, position: "relative" },
-                    ]}
+            {allEvents ? (
+              allEvents.map((event) => {
+                return (
+                  <TouchableOpacity
+                    // key={event.event_name} change to id later
+                    onPress={() => handleLocation(event)}
                   >
-                    <View style={{ padding: 10 }}>
-                      <ThemedText style={{ fontSize: 25, fontWeight: "bold" }}>
-                        {event.event_name}
-                      </ThemedText>
-                      <ThemedText>{event.description}</ThemedText>
-
-                      <ThemedText style>
-                        {convertDate(event.start_time)} -{" "}
-                        {convertDate(event.end_time)}
-                      </ThemedText>
-                    </View>
-                    <View
-                      style={{
-                        alignSelf: "flex-end",
-                        marginBottom: 10,
-                        marginRight: 10,
-                      }}
+                    <ThemedView
+                      key={event.id}
+                      style={[
+                        styles.eventContainer,
+                        { borderColor: border, position: "relative" },
+                      ]}
                     >
-                      <CountDownTimer
-                        start={event.start_time}
-                        end={event.end_time}
-                      />
-                    </View>
-                  </ThemedView>
-                </TouchableOpacity>
-              );
-            })}
+                      <View style={{ padding: 10 }}>
+                        <ThemedText
+                          style={{ fontSize: 25, fontWeight: "bold" }}
+                        >
+                          {event.event_name}
+                        </ThemedText>
+                        <ThemedText>{event.description}</ThemedText>
+
+                        <ThemedText style>
+                          {convertDate(event.start_time)} -{" "}
+                          {convertDate(event.end_time)}
+                        </ThemedText>
+                      </View>
+                      <View
+                        style={{
+                          alignSelf: "flex-end",
+                          marginBottom: 10,
+                          marginRight: 10,
+                        }}
+                      >
+                        <CountDownTimer
+                          start={event.start_time}
+                          end={event.end_time}
+                        />
+                      </View>
+                    </ThemedView>
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              <>
+                <ActivityIndicator />
+                <ThemedText style={{ fontWeight: "bold" }}>
+                  Getting Events
+                </ThemedText>
+              </>
+            )}
           </ScrollView>
         </ThemedView>
       )}
