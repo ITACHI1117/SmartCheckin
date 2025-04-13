@@ -57,8 +57,8 @@ const EventLists = () => {
     } else if (now < startTime) {
       alert("Event has not started");
     } else {
-      const homeLat = 6.5244; // Latitude
-      const homeLon = 3.1926642868809285; //Longitude
+      const homeLat = event.location[0]; // Latitude
+      const homeLon = event.location[1]; //Longitude
 
       // Check and confirm user location
       if (location) {
@@ -100,8 +100,8 @@ const EventLists = () => {
           </ThemedText>
         </ThemedView>
       ) : (
-        <ThemedView style={{ width: "100%", height: "100%" }}>
-          <ScrollView style={{ height: "100%" }}>
+        <ThemedView style={{ width: "100%", height: "95%" }}>
+          <ScrollView style={{ height: 100, paddingBottom: 500 }}>
             {allEvents ? (
               allEvents.map((event) => {
                 return (
