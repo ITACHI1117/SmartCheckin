@@ -11,6 +11,8 @@ const initialState = {
   selectedEvent: null,
   isLoading: false,
   error: false,
+  errorMessage: "",
+  success: false,
 
   // create Events State
   event_name: "",
@@ -57,13 +59,21 @@ function reducer(state, action) {
       return {
         ...state,
         isLoading: false,
-        error: action.payload,
+        error: false,
+        success: true,
       };
     case "GET_ALL_EVENTS":
       return {
         ...state,
         isLoading: false,
         allEvents: action.payload,
+      };
+    case "ERROR":
+      return {
+        ...state,
+        isLoading: false,
+        error: true,
+        errorMessage: action.payload,
       };
     default: {
       throw new Error("Invalid action type");
@@ -83,6 +93,8 @@ function EventProvider({ children }) {
       isLoading,
       allEvents,
       error,
+      errorMessage,
+      success,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -113,6 +125,19 @@ function EventProvider({ children }) {
   }
   //  Create Event and save to database
   function createEvent() {
+    if (
+      !event_name?.trim() ||
+      !description?.trim() ||
+      !start_date ||
+      !end_date
+    ) {
+      dispatch({
+        type: "ERROR",
+        payload: "Fill in the complete Details of the event",
+      });
+      console.log("error");
+      return;
+    }
     const ISO_String_Start_Date = new Date(start_date).toISOString();
     const ISO_String_End_Date = new Date(end_date).toISOString();
 
@@ -126,7 +151,14 @@ function EventProvider({ children }) {
       start_time: ISO_String_Start_Date,
       end_time: ISO_String_End_Date,
       location: [6.5244, 3.1926642868809285],
-    });
+    })
+      .then(() => {
+        console.log("pushed");
+        dispatch({ type: "SET_CREATED_SAVED", payload: null });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     dispatch({ type: "SET_CREATED_SAVED", payload: null });
   }
 
@@ -152,6 +184,8 @@ function EventProvider({ children }) {
         selectedEvent,
         isLoading,
         error,
+        errorMessage,
+        success,
         event_name,
         description,
         location,
