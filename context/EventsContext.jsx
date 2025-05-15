@@ -61,6 +61,11 @@ function reducer(state, action) {
         isLoading: false,
         error: false,
         success: true,
+        event_name: "",
+        description: "",
+        location: "",
+        start_date: "",
+        end_date: "",
       };
     case "GET_ALL_EVENTS":
       return {
@@ -104,7 +109,7 @@ function EventProvider({ children }) {
     update(ref(database, `Attendance/${event.event_id}/${user.matricNumber}`), {
       Event: event.event_name,
       Event_id: event.event_id,
-      date: event.date,
+      // date: event.date,
       student_name: user.firstName + " " + user.lastName,
       matricNumber: user.matricNumber,
       checkin_time: Date.now(),
@@ -145,12 +150,15 @@ function EventProvider({ children }) {
     console.log("END Date: ", ISO_String_End_Date);
 
     dispatch({ type: "SET_CREATING_EVENT", payload: null });
-    push(ref(database, `Events/`), {
+    const newEventRef = push(ref(database, "Events"));
+    const event_id = newEventRef.key;
+    set(newEventRef, {
       event_name: event_name,
+      event_id: event_id,
       description: description,
       start_time: ISO_String_Start_Date,
       end_time: ISO_String_End_Date,
-      location: [6.5244, 3.1926642868809285],
+      location: location,
     })
       .then(() => {
         console.log("pushed");

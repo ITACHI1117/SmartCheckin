@@ -33,6 +33,7 @@ import {
   GestureHandlerRootView,
   PanGestureHandler,
 } from "react-native-gesture-handler";
+import * as Location from "expo-location";
 
 const Admin = () => {
   const { user, SignUpLoading, SignUp, SignUpError } = useUser();
@@ -40,7 +41,6 @@ const Admin = () => {
   const {
     event_name,
     description,
-    location,
     start_date,
     end_date,
     handelChange,
@@ -49,19 +49,27 @@ const Admin = () => {
     success,
     error,
     errorMessage,
+    location,
   } = useEvent();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const translateX = new Animated.Value(0);
+  const [adminLocation, setAdminLocation] = useState(null);
 
+  // initial Date
+  useEffect(() => {
+    handelChange("start_date", startDate);
+    handelChange("end_date", endDate);
+  }, []);
+
+  //Toast Gesture Handler
   const onGestureEvent = Animated.event(
     [{ nativeEvent: { translationX: translateX } }],
     { useNativeDriver: true }
   );
-
   const onHandlerStateChange = ({ nativeEvent }) => {
     if (nativeEvent.translationX < -100 || nativeEvent.translationX > 100) {
       setVisible(false); // Swiped left
@@ -74,6 +82,7 @@ const Admin = () => {
     }
   };
 
+  // handel Start and End Date
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     handelChange("start_date", selectedDate);
@@ -92,14 +101,42 @@ const Admin = () => {
     setEndDate(EndDate);
   };
 
+  //remove Toast after timeout
   useEffect(() => {
     visible && setTimeout(() => setVisible(false), 3000);
   }, [visible]);
 
+  // handel form submission
   const handleSubmit = () => {
     createEvent();
     setVisible(true);
   };
+
+  // Get Admin Current location
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setAdminLocation(currentLocation.coords);
+      handelChange("location", [
+        currentLocation.coords.latitude,
+        currentLocation.coords.longitude,
+      ]);
+      // location = [];
+
+      console.log(currentLocation.coords.latitude);
+      console.log(currentLocation.coords.longitude);
+    })();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(adminLocation);
+  // }, [adminLocation]);
 
   const { border, text, background } = useThemeStyles();
   return (
@@ -184,8 +221,8 @@ const Admin = () => {
                     //onChangeText={handlePasswordChange}
                   />
                 </View>
-                <ThemedText type="label">Location</ThemedText>
-                <View>
+                {/* <ThemedText type="label">Location</ThemedText> */}
+                {/* <View>
                   <TextInput
                     style={[
                       styles.textInput,
@@ -202,7 +239,7 @@ const Admin = () => {
                     color={text}
                     // secureTextEntry={viewPassword}
                   />
-                </View>
+                </View> */}
                 <ThemedText type="label">Date and Tine</ThemedText>
                 <View
                   style={{

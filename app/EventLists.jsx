@@ -42,7 +42,6 @@ const EventLists = () => {
 
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation.coords);
-      console.log(currentLocation);
     })();
   }, []);
 
