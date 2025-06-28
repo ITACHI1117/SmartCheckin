@@ -52,6 +52,12 @@
           "recordAudioAndroid": true
         }
       ],
+            [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "NFC is used to scan NFC tags."
+        }
+      ],
       "expo-barcode-scanner",
       "react-native-nfc-manager"
     ],
@@ -66,9 +72,7 @@
         "projectId": "6874ed7a-c455-4eff-a17c-76b07dcf5a5b"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/6874ed7a-c455-4eff-a17c-76b07dcf5a5b"
     }

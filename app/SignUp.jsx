@@ -56,7 +56,9 @@ export default function SignUp() {
           // style={{ flex: 1, width: "100%" }}
         >
           <View style={styles.container}>
-            <ThemedText type="title">Sign Up</ThemedText>
+            <ThemedText type="title" style={{ fontSize: 25 }}>
+              Sign Up
+            </ThemedText>
             <View style={{ marginTop: 30 }}>
               <ThemedText type="label">First Name</ThemedText>
               <View>
@@ -210,7 +212,7 @@ export default function SignUp() {
       <View
         style={{
           position: "absolute",
-          bottom: "5%",
+          bottom: "8%",
           width: "100%",
           display: "flex",
           alignItems: "center",
@@ -261,7 +263,7 @@ export default function SignUp() {
 }
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    marginTop: 30,
     marginLeft: 20,
   },
   titleContainer: {

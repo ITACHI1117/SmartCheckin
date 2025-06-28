@@ -27,24 +27,36 @@ export default function QrScanScreen() {
   const router = useRouter();
   const { border, text } = useThemeStyles();
 
-  // Check Camera Permission
   if (!permission) {
-    // Camera permissions are still loading.
-    return <View />;
-  }
-  if (!permission.granted) {
-    // Camera permissions are not granted yet.
+    // Permission is still loading
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
+        <Text>Loading permissions...</Text>
       </View>
     );
   }
 
-  permission.granted && Camera;
+  if (!permission.granted) {
+    console.log("Permission not granted. Requesting...");
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>
+          We need your permission to access the camera
+        </Text>
+        <Button
+          onPress={async () => {
+            try {
+              const response = await requestPermission();
+              console.log("Request Permission Response:", response);
+            } catch (error) {
+              console.log("Error requesting permission:", error);
+            }
+          }}
+          title="Grant Permission"
+        />
+      </View>
+    );
+  }
 
   // Set Camera Facing (Front Camera or BAck)
   function toggleCameraFacing() {
@@ -60,7 +72,11 @@ export default function QrScanScreen() {
   // Handel Log out
   const handleLogOut = () => {
     dispatch({ type: "LOGOUT", payload: null });
-    router.replace("./");
+    router.replace("/");
+  };
+
+  const handleNfc = () => {
+    router.replace("/NFCScreen");
   };
 
   return (
@@ -114,7 +130,7 @@ export default function QrScanScreen() {
         <ThemedText>{scanedData}</ThemedText>
       </ThemedView>
       <TouchableOpacity
-        onPress={toggleCameraFacing}
+        onPress={handleNfc}
         style={[styles.button, { borderColor: border }]}
       >
         <ThemedText style={[styles.text, { color: text }]}>Use NFC</ThemedText>
@@ -138,7 +154,7 @@ const styles = StyleSheet.create({
   container: {
     display: "flex",
     width: "100%",
-    // height: "50%",
+    height: "50%",
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "",
@@ -151,7 +167,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     width: "100%",
-    height: "50%",
+    height: "40%",
   },
   buttonContainer: {
     flexDirection: "row",

@@ -64,7 +64,9 @@ export default function Index() {
           // style={{ flex: 1, width: "100%" }}
         >
           <View style={styles.container}>
-            <ThemedText type="title">Login</ThemedText>
+            <ThemedText type="title" style={{ fontSize: 25 }}>
+              Login
+            </ThemedText>
             <View style={{ marginTop: 30 }}>
               <ThemedText type="label">Email</ThemedText>
               <View>
@@ -120,7 +122,7 @@ export default function Index() {
                 />
               </View>
               <View>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={[
                     styles.textInput,
                     {
@@ -132,19 +134,20 @@ export default function Index() {
                   onPress={() => setPickerVisible(true)}
                 >
                   <ThemedText>Select position</ThemedText>
-                </TouchableOpacity>
-                {pickerVisible && (
-                  <Picker
-                    selectedValue={selectedUser}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setSelectedUser(itemValue)
-                    }
-                    style={{ marginLeft: -15 }}
-                  >
-                    <Picker.Item label="Student" value="Student" />
-                    <Picker.Item label="Staff" value="Staff" />
-                  </Picker>
-                )}
+                // </TouchableOpacity> */}
+                {/* // {pickerVisible && ( */}
+                <Picker
+                  selectedValue={selectedUser}
+                  onValueChange={(itemValue, itemIndex) =>
+                    setSelectedUser(itemValue)
+                  }
+                  style={{ marginLeft: -15, color: text }}
+                  dropdownIconColor={text}
+                >
+                  <Picker.Item label="Student" value="Student" />
+                  <Picker.Item label="Staff" value="Staff" />
+                </Picker>
+                {/* )} */}
 
                 {/* <MaterialCommunityIcons
                   // onPress={() => ViewInputPassword()}
@@ -232,7 +235,7 @@ export default function Index() {
 }
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    marginTop: 30,
     marginLeft: 20,
   },
   titleContainer: {
